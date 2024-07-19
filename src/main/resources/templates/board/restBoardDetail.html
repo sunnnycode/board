@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <title>게시판</title>
+    <link rel="stylesheet" th:href="@{/css/board.css}" />
+</head>
+<body>
+<div class="container">
+    <h2>REST 게시판 상세</h2>
+    <form id="frm" method="post">
+        <input type="hidden" id="boardIdx" name="boardIdx" th:value="${board.boardIdx}" />
+
+        <!--
+        HiddenHttpMethodFilter에서 요청 방식 결정에 사용할 값을 전달하는 용도
+        HTML 폼은 기본적으로 GET과 POST 메서드만 지원하기 때문에
+        PUT, DELETE, PATCH와 같은 다른 메서드를 사용하기 위해 이 필터를 사용
+        -->
+        <input type="hidden" id="method" name="_method" />
+
+        <table class="board_detail">
+            <colgroup>
+                <col width="15%" />
+                <col width="*"   />
+                <col width="15%" />
+                <col width="35%" />
+            </colgroup>
+            <tr>
+                <th scope="row">글 번호</th>
+                <td th:text="${board.boardIdx}"></td>
+                <th scope="row">조회수</th>
+                <td th:text="${board.hitCnt}"></td>
+            </tr>
+            <tr>
+                <th scope="row">작성자</th>
+                <td th:text="${board.creatorId}"></td>
+                <th scope="row">작성일</th>
+                <td th:text="${board.createdDatetime}"></td>
+            </tr>
+            <tr>
+                <th scope="row">제목</th>
+                <td colspan="3"><input type="text" id="title" name="title" th:value="${board.title}" /></td>
+            </tr>
+            <tr>
+                <td colspan="4"><textarea id="contents" name="contents" th:text="${board.contents}"></textarea></td>
+            </tr>
+        </table>
+    </form>
+
+    <div class="file_list">
+        <a th:each="fileInfo : ${board.fileInfoList}"
+           th:text="|${fileInfo.originalFileName} (${fileInfo.fileSize}kb)|"
+           th:href="|/board/file/${fileInfo.boardIdx}/${fileInfo.idx}|"></a>
+    </div>
+
+    <input type="button" id="list" class="btn" value="목록으로" />
+    <input type="button" id="update" class="btn" value="수정하기" />
+    <input type="button" id="delete" class="btn" value="삭제하기" />
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(function() {
+            $('#list').on('click', function() {
+                location.href = '/board';
+            });
+            $('#update').on('click', function() {
+                $('#method').val('PUT');
+                let frm = $('#frm')[0];
+                frm.action = '/board/' + $('#boardIdx').val();
+                frm.submit();
+            });
+            $('#delete').on('click', function() {
+                $('#method').val('DELETE');
+                let frm = $('#frm')[0];
+                frm.action = '/board/' + $('#boardIdx').val();
+                frm.submit();
+            });
+        });
+    </script>
+</div>
+</body>
+</html>
