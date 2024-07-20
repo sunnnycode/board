@@ -51,12 +51,14 @@ public class BoardServiceImpl implements BoardService {
         boardMapper.updateHitCount(boardIdx);
 
         BoardDto boardDto = boardMapper.selectBoardDetail(boardIdx);
-        List<BoardFileDto> boardFileInfo = boardMapper.selectBoardFileList(boardIdx);
-        boardDto.setFileInfoList(boardFileInfo);
+        if (boardDto != null) {
+            List<BoardFileDto> boardFileInfo = boardMapper.selectBoardFileList(boardIdx);
+            boardDto.setFileInfoList(boardFileInfo);
+        }
 
         return boardDto;
-
     }
+
 
     @Override
     public void updateBoard(BoardDto boardDto) {
