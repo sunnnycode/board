@@ -4,17 +4,21 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.board.dto.BoardListResponse;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import org.board.dto.BoardDto;
@@ -34,18 +38,42 @@ public class RestApiBoardController {
     @Autowired
     private BoardService boardService;
 
+    @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "GET")
     @Operation(summary = "게시판 목록 조회", description = "등록된 게시물 목록을 조회해서 반환합니다.")
     @GetMapping("/board")
-    public List<BoardDto> openBoardList(HttpServletRequest request) throws Exception {
-        return boardService.selectBoardList();
+    public List<BoardListResponse> openBoardList(HttpServletRequest request) throws Exception {
+        List<BoardDto> boardList = boardService.selectBoardList();
+
+        List<BoardListResponse> results = new ArrayList<>();
+        /*
+        for (BoardDto dto : boardList) {
+
+			BoardListResponse res = new BoardListResponse();
+			res.setBoardIdx(dto.getBoardIdx());
+			res.setTitle(dto.getTitle());
+			res.setHitCnt(dto.getHitCnt());
+			res.setCreatedDatetime(dto.getCreatedDatetime());
+
+        BoardListResponse res = new ModelMapper().map(dto, BoardListResponse.class);
+        results.add(res);
+    }
+		*/
+        boardList.forEach(dto -> {
+            results.add(new ModelMapper().map(dto, BoardListResponse.class));
+        });
+
+        return results;
     }
 
     @Operation(summary = "게시판 등록", description = "게시물 제목과 내용을 저장합니다.")
     @Parameter(name = "boardDto", description = "게시물 정보를 담고 있는 객체", required = true)
     @PostMapping("/board/write")
-    public void insertBoard(@RequestBody BoardDto boardDto, MultipartHttpServletRequest request) throws Exception {
-        boardService.insertBoard(boardDto, request);
+    public void insertBoard(
+            @RequestPart(value="data", required=true) BoardDto boardDto,
+            @RequestPart(value="files", required=false) MultipartFile[] files) throws Exception {
+        boardService.insertBoardWithFile(boardDto, files);
     }
+
 
     @GetMapping("/board/{boardIdx}")
     public ResponseEntity<Object> openBoardDetail(@PathVariable("boardIdx") int boardIdx) throws Exception {

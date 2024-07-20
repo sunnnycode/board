@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 
@@ -80,5 +81,22 @@ public class BoardServiceImpl implements BoardService {
     public BoardFileDto selectBoardFileInfo(int idx, int boardIdx) {
         return boardMapper.selectBoardFileInfo(idx, boardIdx);
     }
+
+    @Override
+    public void insertBoardWithFile(BoardDto boardDto, MultipartFile[] files) throws Exception {
+        // TODO. 로그인한 사용자의 ID로 변경
+        boardDto.setCreatorId("hong");
+        boardMapper.insertBoard(boardDto);
+
+        // 첨부 파일을 저장하고 첨부 파일 정보를 반환
+        // TODO 내일 이어서 구현 ...
+        List<BoardFileDto> fileInfoList = fileUtils.parseFileInfo(boardDto.getBoardIdx(), files);
+
+        // 첨부 파일 정보를 저장
+        if (!CollectionUtils.isEmpty(fileInfoList)) {
+            boardMapper.insertBoardFileList(fileInfoList);
+        }
+    }
+
 
 }

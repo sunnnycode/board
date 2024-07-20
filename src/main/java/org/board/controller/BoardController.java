@@ -8,6 +8,8 @@ import java.util.List;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.board.dto.BoardFileDto;
+import org.board.dto.BoardInsertRequest;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ObjectUtils;
@@ -45,10 +47,17 @@ public class BoardController {
     }
 
     @PostMapping("/board/insertBoard.do")
-    public String insertBoard(BoardDto boardDto, MultipartHttpServletRequest request) throws Exception {
+    public String insertBoard(BoardInsertRequest boardInsertRequest, MultipartHttpServletRequest request) throws Exception {
+        // 서비스 메서드에 맞춰서 데이터를 변경
+        // BoardDto boardDto = new BoardDto();
+        // boardDto.setTitle(boardInsertRequest.getTitle());
+        // boardDto.setContents(boardInsertRequest.getContents());
+        BoardDto boardDto = new ModelMapper().map(boardInsertRequest, BoardDto.class);
+        //                                        source              destination type
         boardService.insertBoard(boardDto, request);
         return "redirect:/board/openBoardList.do";
     }
+
 
     @GetMapping("/board/openBoardDetail.do")
     public ModelAndView openBoardDetail(@RequestParam("boardIdx") int boardIdx) throws Exception {
